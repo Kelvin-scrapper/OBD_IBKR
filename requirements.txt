@@ -1,0 +1,91 @@
+# IBKR Data Processing Requirements
+# =================================
+#
+# This file lists all Python packages required for the IBKR data processing system.
+# Install with: pip install -r requirements.txt
+
+# PDF Processing
+pdfplumber>=0.7.0              # PDF text and data extraction
+PyPDF2>=3.0.0                  # Alternative PDF processing library
+
+# Web Scraping and Browser Automation
+undetected-chromedriver>=3.5.0 # Chrome automation (anti-detection)
+selenium>=4.15.0               # Web browser automation
+webdriver-manager>=4.0.0       # Automatic webdriver management
+
+# Data Processing
+pandas>=2.0.0                  # Data manipulation and analysis
+openpyxl>=3.1.0               # Excel file handling
+xlsxwriter>=3.1.0             # Excel file writing
+
+# HTTP Requests
+requests>=2.31.0               # HTTP library
+urllib3>=2.0.0                # HTTP client library
+
+# System and File Operations
+pathlib                        # Path operations (built-in Python 3.4+)
+datetime                       # Date/time operations (built-in)
+logging                        # Logging functionality (built-in)
+subprocess                     # Process execution (built-in)
+argparse                       # Command line argument parsing (built-in)
+
+# Optional Dependencies for Enhanced Functionality
+# ================================================
+
+# Image Processing (if PDFs contain images)
+Pillow>=10.0.0                # Python Imaging Library
+
+# Scientific Computing (for advanced data analysis)
+numpy>=1.24.0                 # Numerical computing
+scipy>=1.10.0                 # Scientific computing
+
+# Progress Bars and UI
+tqdm>=4.65.0                  # Progress bars for long operations
+
+# Configuration Management
+python-dotenv>=1.0.0          # Environment variable management
+
+# Development and Testing
+# =======================
+
+# Testing Framework
+pytest>=7.4.0                # Testing framework
+pytest-cov>=4.1.0            # Test coverage
+
+# Code Quality
+black>=23.0.0                 # Code formatter
+flake8>=6.0.0                 # Code linter
+mypy>=1.5.0                   # Type checker
+
+# Documentation
+sphinx>=7.0.0                 # Documentation generator
+
+# Version Compatibility Notes:
+# ===========================
+#
+# Python Version: Requires Python 3.8 or higher
+#
+# Chrome Browser: Required for web scraping functionality
+# - Must have Chrome browser installed
+# - Chrome version 110+ recommended
+#
+# Windows Compatibility:
+# - All packages are Windows 10/11 compatible
+# - Some packages may require Visual C++ Build Tools
+#
+# Installation Commands:
+# =====================
+#
+# Basic installation:
+#   pip install -r requirements.txt
+#
+# Development installation (includes testing/dev tools):
+#   pip install -r requirements.txt pytest black flake8
+#
+# Virtual environment setup (recommended):
+#   python -m venv venv
+#   venv\Scripts\activate  # Windows
+#   pip install -r requirements.txt
+#
+# Update all packages:
+#   pip install --upgrade -r requirements.txt
