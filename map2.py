@@ -138,6 +138,45 @@ class Logger:
     def debug(message):
         print(f"DEBUG: {message}")
 
+def extract_pdf_from_java_wrapper(file_path):
+    """Extract actual PDF content from Java-serialized wrapper if present"""
+    try:
+        with open(file_path, 'rb') as f:
+            data = f.read()
+
+        # Check if this is a Java-wrapped PDF
+        if data.startswith(b'\xac\xed'):  # Java serialization magic bytes
+            # Find the PDF header
+            pdf_start = data.find(b'%PDF-')
+            if pdf_start == -1:
+                return file_path  # No PDF content found, return original
+
+            # Find the PDF end marker
+            pdf_end = data.rfind(b'%%EOF')
+            if pdf_end == -1:
+                return file_path  # No PDF end marker, return original
+
+            # Extract PDF content
+            pdf_content = data[pdf_start:pdf_end + 5]
+
+            # Create temporary clean PDF file
+            import tempfile
+            temp_fd, temp_path = tempfile.mkstemp(suffix='.pdf')
+            os.close(temp_fd)
+
+            with open(temp_path, 'wb') as f:
+                f.write(pdf_content)
+
+            Logger.debug(f"Extracted PDF from Java wrapper: {len(pdf_content)} bytes")
+            return temp_path
+
+        # Not a Java wrapper, return original path
+        return file_path
+
+    except Exception as e:
+        Logger.warning(f"Could not check for Java wrapper: {e}")
+        return file_path
+
 def clean_numeric_value(value_str):
     """Clean and normalize numeric values"""
     if not value_str:
@@ -288,16 +327,20 @@ class PDFParser:
         target_month_abbr = Config.MONTH_MAPPING.get(target_month_num)
         if not target_month_abbr:
             return {"Error": f"Invalid target month number: {target_month_num}"}
-        
+
         # Validate inputs
         valid, error_msg = validate_date_params(target_year, target_month_num)
         if not valid:
             return {"Error": error_msg}
-        
+
         self.logger.info(f"Parsing {Path(pdf_path).name} for {target_year} {target_month_abbr}")
-        
+
+        # Extract from Java wrapper if needed
+        clean_pdf_path = extract_pdf_from_java_wrapper(pdf_path)
+        temp_file_created = clean_pdf_path != pdf_path
+
         try:
-            with pdfplumber.open(pdf_path) as pdf:
+            with pdfplumber.open(clean_pdf_path) as pdf:
                 if not pdf.pages:
                     return {"Error": "PDF has no pages"}
                 
@@ -326,9 +369,16 @@ class PDFParser:
                     return result
                 
                 return {"Error": "All parsing strategies failed to extract sufficient data"}
-                
+
         except Exception as e:
             return {"Error": f"PDF processing failed: {str(e)}"}
+        finally:
+            # Clean up temporary file if created
+            if temp_file_created and os.path.exists(clean_pdf_path):
+                try:
+                    os.unlink(clean_pdf_path)
+                except:
+                    pass
     
     def _parse_using_text_extraction(self, pdf, target_year, target_month_abbr):
         """Strategy 1: Text extraction with regex patterns"""
@@ -614,10 +664,14 @@ class PDFParser:
     
     def parse_press_release(self, pdf_path):
         """Parse press release PDF with improved pattern matching"""
+        # Extract from Java wrapper if needed
+        clean_pdf_path = extract_pdf_from_java_wrapper(pdf_path)
+        temp_file_created = clean_pdf_path != pdf_path
+
         try:
-            with pdfplumber.open(pdf_path) as pdf:
+            with pdfplumber.open(clean_pdf_path) as pdf:
                 report_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
-            
+
             if not report_text.strip():
                 return {"Error": "No text extracted from press release PDF"}
             
@@ -665,9 +719,16 @@ class PDFParser:
                 self.logger.success(f"Press release extraction successful: {len(data)} products found")
             
             return data
-            
+
         except Exception as e:
             return {"Error": f"Press release parsing failed: {str(e)}"}
+        finally:
+            # Clean up temporary file if created
+            if temp_file_created and os.path.exists(clean_pdf_path):
+                try:
+                    os.unlink(clean_pdf_path)
+                except:
+                    pass
 
 # ==============================================================================
 # 4. DATA PROCESSING AND OUTPUT
