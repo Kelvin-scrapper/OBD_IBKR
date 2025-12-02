@@ -74,7 +74,7 @@ def find_and_download_pdfs(url):
     
     driver = None
     try:
-        driver = uc.Chrome(options=options, version_main=140)
+        driver = uc.Chrome(options=options, version_main=None)  # Auto-detect Chrome version
         
         # Additional anti-detection measures
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")

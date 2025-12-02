@@ -885,8 +885,8 @@ class DataProcessor:
                 equity_val = float(str(client_equity).replace(',', ''))
                 if equity_val > 0:
                     cash_percentage = (credits_val / equity_val) * 100
-                    final_mapped_data['USA.OBD.INTERACTIVE.ACCOUNTLEVEL.CASH.M'] = f"{cash_percentage:.11f}"
-                    self.logger.info(f"Calculated Cash %: {credits_val}/{equity_val}*100 = {cash_percentage:.11f}")
+                    final_mapped_data['USA.OBD.INTERACTIVE.ACCOUNTLEVEL.CASH.M'] = str(cash_percentage)
+                    self.logger.info(f"Calculated Cash %: {credits_val}/{equity_val}*100 = {cash_percentage}")
             except (ValueError, ZeroDivisionError) as e:
                 self.logger.warning(f"Could not calculate Cash % of Assets: {e}")
         
